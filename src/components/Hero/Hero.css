@@ -1,0 +1,470 @@
+.hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 80px;
+    /* Space for fixed navbar */
+    overflow: hidden;
+}
+
+.hero-content {
+    flex: 1;
+    max-width: 600px;
+    z-index: 2;
+}
+
+.greeting {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+.name {
+    font-size: 4.5rem;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    letter-spacing: -2px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 20px;
+}
+
+.title span {
+    font-weight: 800;
+}
+
+.description {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    max-width: 90%;
+}
+
+.social-icons {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.social-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary);
+    font-size: 1.2rem;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.social-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--primary);
+    z-index: -1;
+    transition: var(--transition);
+    transform: translateY(100%);
+}
+
+.social-icon:hover::before {
+    transform: translateY(0);
+}
+
+.social-icon:hover {
+    color: #000;
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(0, 242, 234, 0.4);
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+/* Hero Image / Graphics Side */
+.hero-image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.blob-bg {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--primary) 0%, rgba(0, 0, 0, 0) 70%);
+    opacity: 0.2;
+    filter: blur(80px);
+    z-index: 1;
+    animation: blob-pulse 10s infinite alternate;
+}
+
+.orbit-container {
+    position: relative;
+    width: 450px;
+    height: 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-img-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 50px rgba(0, 242, 234, 0.2);
+    background: var(--bg-card);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.hero-img {
+    width: 100%;
+    height: 110%;
+    /* Slight zoom to fit better if needed */
+    object-fit: cover;
+    object-position: top;
+    transition: transform 0.5s ease;
+}
+
+.hero-img-wrapper:hover .hero-img {
+    transform: scale(1.05);
+}
+
+/* Orbiting Skills */
+.orbit-skills {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    animation: rotate 20s linear infinite;
+}
+
+.orbit-item {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: rgba(20, 20, 20, 0.8);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    /* Calculate position based on index */
+    /* transform: rotate(calc(360deg / 6 * var(--i))) translateX(225px) rotate(calc(-360deg / 6 * var(--i))); */
+
+    /* Actually, better to use standard transform math logic */
+    left: 50%;
+    top: 50%;
+    transform-origin: center;
+    transform: rotate(calc(60deg * var(--i))) translate(200px) rotate(calc(-60deg * var(--i)));
+    /* Translate pushes it out to radius */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s;
+}
+
+/* Counter-rotate the icons so they stay upright - handled by the negative rotate in the transform above? 
+   Yes: rotate(angle) translate(radius) rotate(-angle) keeps element upright while orbiting.
+   Wait, if the parent .orbit-skills is rotating, the items will rotate with it.
+   So I need to counter-rotate the ITEMS themselves inside the animation.
+   
+   Better approach: 
+   Rotate .orbit-skills container.
+   Then inside .orbit-item, counter-rotate content? 
+   
+   Let's stick to the CSS variable approach which defines static positions in a circle, 
+   and then animate the whole container? No, that rotates the item orientation.
+   
+   Correct Orbit Animation Method:
+   1. Appply animation to .orbit-skills to rotate 360deg.
+   2. Apply reverse animation to .orbit-item to rotate -360deg.
+*/
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes counter-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(-360deg);
+    }
+}
+
+.orbit-skills {
+    animation: rotate 20s linear infinite;
+}
+
+.orbit-item {
+    /* Position them in a circle initially */
+    position: absolute;
+    left: calc(50% - 25px);
+    /* Center - half width */
+    top: calc(50% - 25px);
+    transform: rotate(calc(60deg * var(--i))) translate(210px);
+}
+
+/* We need inner element to counter rotate if we want them upright? 
+   Actuall simple way: 
+   The .orbit-skills rotates. 
+   The .orbit-item is fixed relative to that container.
+   So the item moves in a circle.
+   But the item itself also rotates.
+   To keep icon upright, we need to counter-rotate the icon inside the item.
+*/
+
+.orbit-item svg {
+    animation: counter-rotate 20s linear infinite;
+    /* But wait, the item itself has a transform applied for position.
+     The parent .orbit-skills is rotating.
+     So the item's coordinate system is rotating.
+     We need to rotate the item itself back?
+     
+     Actually, simpler:
+     Don't rotate the container.
+     Animate the items.
+  */
+}
+
+/* Let's try the simpler approach that ensures they are upright:
+   Animate the rotation property of the container. 
+   And animate the items in reverse? 
+   
+   Actually, let's just make the whole container rotate, and inside each item, give the ICON a reverse rotation.
+*/
+
+.orbit-item {
+    /* reset transform for cleaner animation logic if we use keyframes on items */
+    /* Let's use the container rotation approach */
+}
+
+/* REVISED ORBIT CSS */
+.orbit-skills {
+    animation: rotateContainer 20s linear infinite;
+}
+
+@keyframes rotateContainer {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.orbit-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+    /* Place items on the circle */
+    transform: rotate(calc(60deg * var(--i))) translate(220px) rotate(calc(-60deg * var(--i)));
+
+    /* Wait, if I use the translate method in a static container, they don't move (orbit).
+     They just stay in a circle.
+     If I rotate the container, they orbit.
+     BUT if I simply rotate the container, the "rotate(-60deg)" part is static relative to container.
+     So the item ends up pointing inward/outward fixedly, and the whole thing spins.
+     This means icons will rotate.
+     
+     To keep icons upright:
+     We need the icon itself to simply NOT rotate relative to viewport.
+     So we need:
+     container rotates (0 to 360).
+     item rotates (0 to 360)? No.
+     
+     Let's try a proven method:
+     Container spins.
+     Item spins opposite direction.
+  */
+}
+
+.orbit-skills {
+    /* Just a wrapper, centered */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.orbit-item {
+    position: absolute;
+    transform-origin: 220px;
+    /* Radius of orbit */
+    /* This is tricky to center.
+      Let's go back to: absolute items.
+   */
+}
+
+/* Method: transform-origin on the center of the orbit */
+.orbit-skills .orbit-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    margin: -30px;
+    border-radius: 50%;
+    background: rgba(30, 30, 30, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+
+    /* Animation */
+    animation: orbit-anim 20s linear infinite;
+    animation-delay: calc(20s / 6 * (var(--i) * -1));
+}
+
+@keyframes orbit-anim {
+    0% {
+        transform: rotate(0deg) translateX(210px) rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg) translateX(210px) rotate(-360deg);
+    }
+}
+
+/* This keyframe `rotate(360deg) translateX(R) rotate(-360deg)` 
+   1. Rotates the arm (position on circle).
+   2. Translates out to Radius.
+   3. Rotates the item back so it stays upright.
+   This works perfect for individual items without a rotating container.
+*/
+
+@keyframes blob-pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0.3;
+    }
+}
+
+@media screen and (max-width: 968px) {
+    .hero {
+        flex-direction: column-reverse;
+        /* Content on top, but visual hierarchy */
+        justify-content: center;
+        text-align: center;
+        padding-top: 120px;
+    }
+
+    .hero-content {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+
+    .greeting {
+        font-size: 1.2rem;
+    }
+
+    .name {
+        font-size: 3rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .orbit-container {
+        width: 350px;
+        height: 350px;
+    }
+
+    .hero-img-wrapper {
+        width: 250px;
+        height: 250px;
+    }
+
+    @keyframes orbit-anim-mobile {
+        0% {
+            transform: rotate(0deg) translateX(160px) rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg) translateX(160px) rotate(-360deg);
+        }
+    }
+
+    .orbit-skills .orbit-item {
+        width: 45px;
+        height: 45px;
+        font-size: 1.4rem;
+        margin: -22.5px;
+        animation-name: orbit-anim-mobile;
+    }
+}
+
+.cursor {
+    display: inline-block;
+    margin-left: 5px;
+    animation: blink 1s infinite;
+    color: var(--primary);
+    font-weight: 400;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

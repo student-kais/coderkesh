@@ -1,0 +1,19 @@
+.footer {
+    padding: 20px;
+    background: #000;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.heart {
+    color: var(--secondary);
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 5px;
+}
+
+.made-with {
+    margin-top: 5px;
+}
