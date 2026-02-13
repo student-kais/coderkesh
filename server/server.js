@@ -36,15 +36,25 @@ const ContactSchema = new mongoose.Schema({
 const Contact = mongoose.model('Contact', ContactSchema);
 
 // =====================
-// Resend SMTP
+// SMTP Configuration (Updated to 587 for better reliability)
 // =====================
 const transporter = nodemailer.createTransport({
   host: 'smtp.resend.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false, // TLS
   auth: {
     user: 'resend',
     pass: process.env.RESEND_API_KEY
+  },
+  connectionTimeout: 10000, // 10 seconds timeout
+});
+
+// Verify SMTP connection on startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('SMTP Connection Failed ❌:', error);
+  } else {
+    console.log('SMTP Server is ready to take messages ✅');
   }
 });
 
@@ -62,25 +72,37 @@ app.post('/api/contact', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Missing fields' });
     }
 
-    // Attempt DB Save
+    // Save to DB
     try {
       if (mongoose.connection.readyState === 1) {
         await Contact.create({ name, email, message });
         console.log('Saved to MongoDB ✅');
       }
     } catch (dbErr) {
-      console.warn('Database Save Failed (Continuing anyway) ⚠️:', dbErr.message);
+      console.warn('DB Save Failed:', dbErr.message);
     }
 
     // Attempt Email Send
-    console.log('Attempting to send email via Resend...');
-    await transporter.sendMail({
-      from: 'Portfolio <onboarding@resend.dev>',
-      to: process.env.OWNER_EMAIL, // Must be kaismanknojiya@gmail.com for Resend free test
-      subject: `New Portal Message: ${name}`,
-      text: `Agent: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+    console.log('Attempting to send email...');
+    const info = await transporter.sendMail({
+      from: 'Portfolio Portal <onboarding@resend.dev>',
+      to: process.env.OWNER_EMAIL,
+      replyTo: email,
+      subject: `New Message from ${name}`,
+      text: `Agent: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+          <h2 style="color: #00e5ff;">New Transmission Received</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <hr />
+          <p><strong>Message:</strong></p>
+          <p>${message}</p>
+        </div>
+      `
     });
-    console.log('Email Sent Successfully ✅');
+
+    console.log('Email Sent Successfully ✅ Info ID:', info.messageId);
 
     return res.status(200).json({
       success: true,
@@ -88,10 +110,11 @@ app.post('/api/contact', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('CRITICAL CONTACT ERROR ❌:', err);
+    console.error('CRITICAL EMAIL ERROR ❌:', err.stack); // More detailed error stack
     return res.status(500).json({
       success: false,
-      message: 'Server failed to process transmission'
+      message: 'Failed to process email. Check server logs.',
+      error: err.message
     });
   }
 });
