@@ -53,7 +53,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // =====================
-// Routes
+// API Routes
 // =====================
 
 app.post('/api/contact', async (req, res) => {
@@ -120,18 +120,15 @@ app.get('/api/status', (req, res) => {
 });
 
 // =====================
-// Production Setup
+// Production Setup (SPA Routing)
 // =====================
 // Serve static files from the React app (dist folder)
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
-// In Express 5, use (.*) for catch-all
-app.get('(.*)', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, '../dist/index.html'));
-  }
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 // =====================
