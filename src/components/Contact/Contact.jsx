@@ -157,9 +157,13 @@ const Contact = () => {
     setStatus('sending');
 
     try {
-      // Pointing to Render backend explicitly so it works everywhere (Vercel, Netlify, etc.)
+      // Smart URL detection
+      const API_BASE = window.location.hostname === 'localhost'
+        ? 'http://localhost:5000'
+        : 'https://coderkesh.onrender.com';
+
       const response = await fetch(
-        'https://coderkesh.onrender.com/api/contact',
+        `${API_BASE}/api/contact`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
