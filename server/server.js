@@ -67,33 +67,22 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
-    // Save to MongoDB (Try/Catch to allow email sending even if DB fails)
     try {
       if (mongoose.connection.readyState === 1) {
         await Contact.create({ name, email, message });
-      } else {
-        console.warn('MongoDB not connected, skipping DB save.');
       }
     } catch (dbErr) {
-      console.error('Database Save Failed (Continuing to Email) ⚠️:', dbErr.message);
+      console.error('Database Save Failed ⚠️:', dbErr.message);
     }
 
-    // Send email
     await transporter.sendMail({
       from: 'Portfolio <onboarding@resend.dev>',
       to: process.env.OWNER_EMAIL,
       replyTo: email,
       subject: `New Contact from ${name}`,
-      text: `
-  Name: ${name}
-  Email: ${email}
-
-  Message:
-  ${message}
-        `
+      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
     });
 
-    // SUCCESS RESPONSE (JSON ALWAYS)
     return res.status(200).json({
       success: true,
       message: 'Message sent successfully'
@@ -101,16 +90,9 @@ app.post('/api/contact', async (req, res) => {
 
   } catch (err) {
     console.error('CONTACT ERROR 👉', err);
-
-    // ERROR RESPONSE (JSON ALWAYS)
     return res.status(500).json({
       success: false,
-      message: err.message || 'Server error',
-      error: {
-        code: err.code,
-        name: err.name,
-        details: err.response
-      }
+      message: err.message || 'Server error'
     });
   }
 });
@@ -120,15 +102,14 @@ app.get('/api/status', (req, res) => {
 });
 
 // =====================
-// Production Setup (SPA Routing)
+// Production Setup (Yahi website show karega)
 // =====================
-// Serve static files from the React app (dist folder)
 app.use(express.static(path.join(__dirname, '../dist')));
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../dist/index.html'));
+  }
 });
 
 // =====================

@@ -157,10 +157,8 @@ const Contact = () => {
     setStatus('sending');
 
     try {
-      // Pointing to Render backend explicitly so messages work on Vercel/Netlify
-      const API_URL = import.meta.env.VITE_API_URL || 'https://coderkesh.onrender.com';
       const response = await fetch(
-        `${API_URL}/api/contact`,
+        '/api/contact', // Relative path for the combined app
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
