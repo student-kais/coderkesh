@@ -1,11 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(cors());
 app.use(express.json());
@@ -36,29 +37,6 @@ const ContactSchema = new mongoose.Schema({
 const Contact = mongoose.model('Contact', ContactSchema);
 
 // =====================
-// SMTP Configuration (Updated to 587 for better reliability)
-// =====================
-const transporter = nodemailer.createTransport({
-  host: 'smtp.resend.com',
-  port: 587,
-  secure: false, // TLS
-  auth: {
-    user: 'resend',
-    pass: process.env.RESEND_API_KEY
-  },
-  connectionTimeout: 10000, // 10 seconds timeout
-});
-
-// Verify SMTP connection on startup
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('SMTP Connection Failed ❌:', error);
-  } else {
-    console.log('SMTP Server is ready to take messages ✅');
-  }
-});
-
-// =====================
 // API Routes
 // =====================
 
@@ -82,27 +60,34 @@ app.post('/api/contact', async (req, res) => {
       console.warn('DB Save Failed:', dbErr.message);
     }
 
-    // Attempt Email Send
-    console.log('Attempting to send email...');
-    const info = await transporter.sendMail({
+    // Attempt Email Send via Resend SDK (Uses HTTP, won't be blocked)
+    console.log('Attempting to send email via Resend SDK...');
+    const { data, error } = await resend.emails.send({
       from: 'Portfolio Portal <onboarding@resend.dev>',
-      to: process.env.OWNER_EMAIL,
-      replyTo: email,
-      subject: `New Message from ${name}`,
-      text: `Agent: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      to: [process.env.OWNER_EMAIL],
+      subject: `New Transmission from ${name}`,
+      reply_to: email,
       html: `
-        <div style="font-family: sans-serif; padding: 20px; color: #333;">
-          <h2 style="color: #00e5ff;">New Transmission Received</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <hr />
+        <div style="font-family: sans-serif; padding: 20px; color: #333; background: #f9f9f9; border-radius: 10px;">
+          <h2 style="color: #00e5ff;">Message Received</h2>
+          <p><strong>Agent Name:</strong> ${name}</p>
+          <p><strong>Secure Email:</strong> ${email}</p>
+          <hr style="border: 0; border-top: 1px solid #ddd;" />
           <p><strong>Message:</strong></p>
-          <p>${message}</p>
+          <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+            ${message.replace(/\n/g, '<br/>')}
+          </div>
+          <p style="font-size: 12px; color: #888; margin-top: 20px;">Received via Portfolio Portal Transmission</p>
         </div>
       `
     });
 
-    console.log('Email Sent Successfully ✅ Info ID:', info.messageId);
+    if (error) {
+      console.error('Resend SDK Error ❌:', error);
+      throw new Error(error.message);
+    }
+
+    console.log('Email Sent Successfully ✅ ID:', data.id);
 
     return res.status(200).json({
       success: true,
@@ -110,10 +95,10 @@ app.post('/api/contact', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('CRITICAL EMAIL ERROR ❌:', err.stack); // More detailed error stack
+    console.error('CRITICAL ERROR ❌:', err.message);
     return res.status(500).json({
       success: false,
-      message: 'Failed to process email. Check server logs.',
+      message: 'Failed to process transmission',
       error: err.message
     });
   }
