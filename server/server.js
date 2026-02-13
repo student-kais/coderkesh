@@ -13,9 +13,6 @@ app.use(express.json());
 // =====================
 // MongoDB Connection
 // =====================
-// =====================
-// MongoDB Connection
-// =====================
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -58,9 +55,6 @@ const transporter = nodemailer.createTransport({
 // =====================
 // Routes
 // =====================
-app.get('/', (req, res) => {
-  res.json({ status: 'Backend running 🚀' });
-});
 
 app.post('/api/contact', async (req, res) => {
   try {
@@ -115,10 +109,14 @@ app.post('/api/contact', async (req, res) => {
       error: {
         code: err.code,
         name: err.name,
-        details: err.response // Some SMTP errors have response details
+        details: err.response
       }
     });
   }
+});
+
+app.get('/api/status', (req, res) => {
+  res.json({ status: 'Backend running 🚀' });
 });
 
 // =====================
@@ -127,13 +125,10 @@ app.post('/api/contact', async (req, res) => {
 // Serve static files from the React app (dist folder)
 app.use(express.static(path.join(__dirname, '../dist')));
 
-app.get('/api/status', (req, res) => {
-  res.json({ status: 'Backend running 🚀' });
-});
-
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
-app.get('*', (req, res) => {
+// In Express 5, use (.*) for catch-all
+app.get('(.*)', (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
   }
