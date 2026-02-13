@@ -157,8 +157,9 @@ const Contact = () => {
     setStatus('sending');
 
     try {
+      // Pointing to Render backend explicitly so it works everywhere (Vercel, Netlify, etc.)
       const response = await fetch(
-        '/api/contact', // Relative path for the combined app
+        'https://coderkesh.onrender.com/api/contact',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -18,14 +18,10 @@ const connectDB = async () => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('MongoDB Connected ✅');
   } catch (err) {
-    console.warn('MongoDB Connection Failed (Emails will still work) ⚠️');
-    console.error(err.message);
+    console.error('MongoDB Connection Error ❌:', err.message);
   }
 };
 connectDB();
-
-// Keep server alive even if DB fails
-setInterval(() => { console.log('Keep-alive ping'); }, 1000 * 60 * 60);
 
 // =====================
 // Schema
@@ -57,52 +53,55 @@ const transporter = nodemailer.createTransport({
 // =====================
 
 app.post('/api/contact', async (req, res) => {
+  console.log('Incoming Contact Request 📩:', req.body);
+
   try {
     const { name, email, message } = req.body;
 
     if (!name || !email || !message) {
-      return res.status(400).json({
-        success: false,
-        message: 'All fields are required'
-      });
+      return res.status(400).json({ success: false, message: 'Missing fields' });
     }
 
+    // Attempt DB Save
     try {
       if (mongoose.connection.readyState === 1) {
         await Contact.create({ name, email, message });
+        console.log('Saved to MongoDB ✅');
       }
     } catch (dbErr) {
-      console.error('Database Save Failed ⚠️:', dbErr.message);
+      console.warn('Database Save Failed (Continuing anyway) ⚠️:', dbErr.message);
     }
 
+    // Attempt Email Send
+    console.log('Attempting to send email via Resend...');
     await transporter.sendMail({
       from: 'Portfolio <onboarding@resend.dev>',
-      to: process.env.OWNER_EMAIL,
-      replyTo: email,
-      subject: `New Contact from ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+      to: process.env.OWNER_EMAIL, // Must be kaismanknojiya@gmail.com for Resend free test
+      subject: `New Portal Message: ${name}`,
+      text: `Agent: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
     });
+    console.log('Email Sent Successfully ✅');
 
     return res.status(200).json({
       success: true,
-      message: 'Message sent successfully'
+      message: 'Transmission Received'
     });
 
   } catch (err) {
-    console.error('CONTACT ERROR 👉', err);
+    console.error('CRITICAL CONTACT ERROR ❌:', err);
     return res.status(500).json({
       success: false,
-      message: err.message || 'Server error'
+      message: 'Server failed to process transmission'
     });
   }
 });
 
 app.get('/api/status', (req, res) => {
-  res.json({ status: 'Backend running 🚀' });
+  res.json({ status: 'Backend operational 🚀' });
 });
 
 // =====================
-// Production Setup (Yahi website show karega)
+// Production Setup
 // =====================
 app.use(express.static(path.join(__dirname, '../dist')));
 
@@ -115,5 +114,5 @@ app.get('*', (req, res) => {
 // =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT} 🚀`);
 });
