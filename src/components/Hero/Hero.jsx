@@ -85,7 +85,7 @@ const Hero = () => {
                 >
                     <a href="https://github.com" target="_blank" rel="noreferrer" className="social-icon"><FaGithub /></a>
                     <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="social-icon"><FaLinkedin /></a>
-                    <a href="https://instagram.com" target="_blank" rel="noreferrer" className="social-icon"><FaInstagram /></a>
+                    <a href="https://www.instagram.com/amz.kais/" target="_blank" rel="noreferrer" className="social-icon"><FaInstagram /></a>
                     <a href="mailto:kaismanknojiya@gmail.com" className="social-icon"><FaEnvelope /></a>
                 </motion.div>
 
@@ -95,7 +95,7 @@ const Hero = () => {
                     transition={{ delay: 0.7 }}
                     className="cta-buttons"
                 >
-                    <a href="#contact" className="btn btn-primary">Download CV</a>
+                    <a href="/resume.pdf" download="Kesh_Manknojiya_Resume.pdf" className="btn btn-primary">Download Resume</a>
                     <a href="#about" className="btn btn-outline">About Me</a>
                     {/* Note: User might want 'Contact Me' or 'Projects' here, but 'About Me' is good for flow */}
                 </motion.div>

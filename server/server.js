@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 
@@ -12,12 +13,22 @@ app.use(express.json());
 // =====================
 // MongoDB Connection
 // =====================
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected ✅'))
-  .catch(err => {
-    console.error('MongoDB Error ❌', err);
-    process.exit(1);
-  });
+// =====================
+// MongoDB Connection
+// =====================
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('MongoDB Connected ✅');
+  } catch (err) {
+    console.warn('MongoDB Connection Failed (Emails will still work) ⚠️');
+    console.error(err.message);
+  }
+};
+connectDB();
+
+// Keep server alive even if DB fails
+setInterval(() => { console.log('Keep-alive ping'); }, 1000 * 60 * 60);
 
 // =====================
 // Schema
@@ -62,8 +73,16 @@ app.post('/api/contact', async (req, res) => {
       });
     }
 
-    // Save to MongoDB
-    await Contact.create({ name, email, message });
+    // Save to MongoDB (Try/Catch to allow email sending even if DB fails)
+    try {
+      if (mongoose.connection.readyState === 1) {
+        await Contact.create({ name, email, message });
+      } else {
+        console.warn('MongoDB not connected, skipping DB save.');
+      }
+    } catch (dbErr) {
+      console.error('Database Save Failed (Continuing to Email) ⚠️:', dbErr.message);
+    }
 
     // Send email
     await transporter.sendMail({
@@ -72,12 +91,12 @@ app.post('/api/contact', async (req, res) => {
       replyTo: email,
       subject: `New Contact from ${name}`,
       text: `
-Name: ${name}
-Email: ${email}
+  Name: ${name}
+  Email: ${email}
 
-Message:
-${message}
-      `
+  Message:
+  ${message}
+        `
     });
 
     // SUCCESS RESPONSE (JSON ALWAYS)
@@ -92,7 +111,12 @@ ${message}
     // ERROR RESPONSE (JSON ALWAYS)
     return res.status(500).json({
       success: false,
-      message: err.message || 'Server error'
+      message: err.message || 'Server error',
+      error: {
+        code: err.code,
+        name: err.name,
+        details: err.response // Some SMTP errors have response details
+      }
     });
   }
 });

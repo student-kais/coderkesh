@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 
 const Skills = () => {
     const skillsData = [
-        { category: "Frontend", items: ["HTML/CSS", "JavaScript", "React.js", "TailwindCSS", "Framer Motion"] },
-        { category: "Backend", items: ["Node.js", "Express", "MongoDB", "REST APIs", "SQL"] },
-        { category: "Tools & Others", items: ["Git/GitHub", "VS Code", "Postman", "Vite", "Responsive Design"] }
+        { category: "Frontend", items: ["HTML", "CSS", "TailwindCSS", "JavaScript", "React.js"] },
+        { category: "Backend", items: ["Node.js", "Express.js", "MongoDB"] },
+        { category: "Tools & Others", items: ["ChatGPT", "Git", "GitHub", "VS Code", "Responsive Design"] }
     ];
 
     return (
@@ -26,19 +26,26 @@ const Skills = () => {
                     >
                         <h3>{category.category}</h3>
                         <div className="skill-list">
-                            {category.items.map((skill, i) => (
-                                <div key={i} className="skill-item">
-                                    <span className="skill-name">{skill}</span>
-                                    <div className="skill-bar-bg">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            whileInView={{ width: '85%' }} // Just a static high percentage for visual aesthetics
-                                            transition={{ duration: 1, delay: 0.5 }}
-                                            className="skill-bar-fill"
-                                        />
+                            {category.items.map((skill, i) => {
+                                // Deterministic "random" percentage between 75 and 80
+                                const percentage = 75 + ((skill.length + i) % 6);
+                                return (
+                                    <div key={i} className="skill-item">
+                                        <div className="skill-info">
+                                            <span className="skill-name">{skill}</span>
+                                        </div>
+                                        <div className="skill-bar-bg">
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                whileInView={{ width: `${percentage}%` }}
+                                                transition={{ duration: 1.2, delay: 0.1, ease: "easeOut" }}
+                                                className="skill-bar-fill"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
+
                         </div>
                     </motion.div>
                 ))}

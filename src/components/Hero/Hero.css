@@ -1,11 +1,14 @@
 .hero {
+    background: transparent !important;
+    backdrop-filter: none !important;
     min-height: 100vh;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     padding-top: 80px;
-    /* Space for fixed navbar */
+    padding-bottom: 40px;
+    /* Add some space at bottom */
     overflow: hidden;
 }
 
@@ -269,10 +272,7 @@
    Actually, let's just make the whole container rotate, and inside each item, give the ICON a reverse rotation.
 */
 
-.orbit-item {
-    /* reset transform for cleaner animation logic if we use keyframes on items */
-    /* Let's use the container rotation approach */
-}
+
 
 /* REVISED ORBIT CSS */
 .orbit-skills {
@@ -344,8 +344,8 @@
     height: 60px;
     margin: -30px;
     border-radius: 50%;
-    background: rgba(30, 30, 30, 0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(30, 30, 30, 0.4);
+    backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: center;
@@ -418,32 +418,98 @@
         font-size: 1.5rem;
     }
 
+
     .orbit-container {
-        width: 350px;
-        height: 350px;
+        width: 200px;
+        height: 200px;
     }
 
     .hero-img-wrapper {
-        width: 250px;
-        height: 250px;
+        width: 150px;
+        height: 150px;
     }
 
     @keyframes orbit-anim-mobile {
         0% {
-            transform: rotate(0deg) translateX(160px) rotate(0deg);
+            transform: rotate(0deg) translateX(100px) rotate(0deg);
         }
 
         100% {
-            transform: rotate(360deg) translateX(160px) rotate(-360deg);
+            transform: rotate(360deg) translateX(100px) rotate(-360deg);
+        }
+    }
+
+
+    .orbit-skills .orbit-item {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        margin: -20px;
+        animation-name: orbit-anim-mobile;
+    }
+
+    .blob-bg {
+        width: 300px;
+        height: 300px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .name {
+        font-size: 2.5rem;
+    }
+
+    .greeting,
+    .title {
+        font-size: 1.2rem;
+    }
+
+    .orbit-container {
+        width: 280px;
+        height: 280px;
+    }
+
+    @keyframes orbit-anim-xs {
+        0% {
+            transform: rotate(0deg) translateX(125px) rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg) translateX(125px) rotate(-360deg);
         }
     }
 
     .orbit-skills .orbit-item {
-        width: 45px;
-        height: 45px;
-        font-size: 1.4rem;
-        margin: -22.5px;
-        animation-name: orbit-anim-mobile;
+        animation-name: orbit-anim-xs;
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+        margin: -17.5px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .name {
+        font-size: 2.2rem;
+    }
+
+    .orbit-container {
+        width: 240px;
+        height: 240px;
+    }
+
+    @keyframes orbit-anim-xxs {
+        0% {
+            transform: rotate(0deg) translateX(110px) rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg) translateX(110px) rotate(-360deg);
+        }
+    }
+
+    .orbit-skills .orbit-item {
+        animation-name: orbit-anim-xxs;
     }
 }
 

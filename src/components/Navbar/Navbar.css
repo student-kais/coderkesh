@@ -1,17 +1,20 @@
 .navbar {
     position: fixed;
-    width: 100%;
     top: 0;
-    z-index: 999;
-    transition: all 0.3s ease-in-out;
-    padding: 20px 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    z-index: 2000 !important;
+    transition: background 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease;
+    padding: 15px 0;
+    box-sizing: border-box;
+    will-change: transform;
 }
 
 .navbar.scrolled {
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(10px);
-    padding: 15px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
 }
 
 .nav-container {
@@ -28,6 +31,12 @@
     font-size: 2rem;
     font-weight: 700;
     color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    position: relative;
+    z-index: 1100;
+    /* Higher than mobile menu overlay */
 }
 
 .logo .dot {
@@ -44,8 +53,11 @@
     font-size: 1rem;
     font-weight: 500;
     color: var(--text-muted);
-    transition: var(--transition);
+    transition: color 0.3s ease;
+    /* Only color transition via CSS, transform handled by Motion */
     position: relative;
+    display: inline-block;
+    /* Required for scale animation */
 }
 
 .nav-link:hover {
@@ -72,6 +84,9 @@
     color: #fff;
     font-size: 1.8rem;
     cursor: pointer;
+    position: relative;
+    z-index: 1100;
+    /* Higher than mobile menu overlay */
 }
 
 @media screen and (max-width: 768px) {
@@ -83,21 +98,48 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        position: absolute;
-        top: -1000px;
+        position: fixed;
+        top: 0;
         left: 0;
+        right: 0;
         width: 100%;
         height: 100vh;
-        background: var(--bg-dark);
-        transition: var(--transition);
-        gap: 50px;
+        background: #0a0a0a;
+        transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.3s ease;
+        transform: translateY(-100%);
+        gap: 40px;
+        opacity: 0;
+        z-index: 1050;
+        visibility: hidden;
+        overflow: hidden;
     }
 
     .nav-menu.active {
-        top: 0;
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
     }
 
     .nav-link {
         font-size: 1.5rem;
+    }
+
+    /* Staggered Animation for Links */
+    .nav-item {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .nav-menu.active .nav-item {
+        animation: slideUpFade 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        animation-delay: calc(0.1s * var(--i) + 0.3s);
+        /* Added base delay so menu opens first */
+    }
+}
+
+@keyframes slideUpFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

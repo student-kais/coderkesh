@@ -1,0 +1,55 @@
+.custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border: none;
+    /* No ring */
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 99999;
+    mix-blend-mode: exclusion;
+    transition: transform 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Simple Center Dot */
+.custom-cursor::after {
+    content: '';
+    width: 10px;
+    /* Slightly larger for visibility */
+    height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+    transition: 0.3s ease;
+}
+
+/* Hover State - Just scales up slightly */
+body.hovering .custom-cursor::after {
+    transform: scale(1.5);
+    background: var(--secondary);
+    box-shadow: 0 0 10px var(--secondary);
+}
+
+/* Hide on touch devices */
+@media (pointer: coarse) {
+    .custom-cursor {
+        display: none;
+    }
+}
+
+/* Hide default cursor */
+@media (pointer: fine) {
+
+    body,
+    a,
+    button,
+    input,
+    textarea {
+        cursor: none;
+    }
+}
